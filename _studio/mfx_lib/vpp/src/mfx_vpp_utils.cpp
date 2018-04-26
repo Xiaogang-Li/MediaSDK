@@ -1314,6 +1314,7 @@ mfxStatus CheckFrameInfo(mfxFrameInfo* info, mfxU32 request, eMFXHWType platform
         case MFX_FOURCC_RGB565:
 #endif
         case MFX_FOURCC_RGB4:
+        case MFX_FOURCC_RGB3:
         case MFX_FOURCC_P010:
         case MFX_FOURCC_P210:
         case MFX_FOURCC_NV16:

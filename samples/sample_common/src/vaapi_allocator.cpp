@@ -33,6 +33,9 @@ enum {
 
 // TODO: remove this internal definition once it appears in VA API
 #define VA_FOURCC_R5G6B5 MFX_MAKEFOURCC('R','G','1','6')
+#ifndef VA_FOURCC_R8G8B8
+#define VA_FOURCC_R8G8B8        MFX_MAKEFOURCC('R','G','2', '4')
+#endif
 
 unsigned int ConvertMfxFourccToVAFormat(mfxU32 fourcc)
 {
@@ -52,6 +55,8 @@ unsigned int ConvertMfxFourccToVAFormat(mfxU32 fourcc)
 #endif
     case MFX_FOURCC_RGB4:
         return VA_FOURCC_ARGB;
+    case MFX_FOURCC_RGB3:
+        return VA_FOURCC_R8G8B8;
     case MFX_FOURCC_P8:
         return VA_FOURCC_P208;
     case MFX_FOURCC_P010:
@@ -164,6 +169,7 @@ mfxStatus vaapiFrameAllocator::AllocImpl(mfxFrameAllocRequest *request, mfxFrame
                        (VA_FOURCC_R5G6B5 != va_fourcc) &&
 #endif
                        (VA_FOURCC_ARGB   != va_fourcc) &&
+                       (VA_FOURCC_R8G8B8 != va_fourcc) &&
                        (VA_FOURCC_P208   != va_fourcc) &&
                        (VA_FOURCC_P010   != va_fourcc)))
     {
@@ -493,6 +499,16 @@ mfxStatus vaapiFrameAllocator::LockFrame(mfxMemId mid, mfxFrameData *ptr)
                     ptr->G = ptr->B;
                     ptr->R = ptr->B;
                     ptr->A = ptr->B;
+                }
+                else mfx_res = MFX_ERR_LOCK_MEMORY;
+                break;
+            case VA_FOURCC_R8G8B8:
+                if (mfx_fourcc == MFX_FOURCC_RGB3)
+                {
+                    ptr->Pitch = (mfxU16)vaapi_mid->m_image.pitches[0];
+                    ptr->B = pBuffer + vaapi_mid->m_image.offsets[0];
+                    ptr->G = ptr->B + 1;
+                    ptr->R = ptr->B + 2;
                 }
                 else mfx_res = MFX_ERR_LOCK_MEMORY;
                 break;
